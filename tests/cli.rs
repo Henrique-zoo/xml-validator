@@ -123,8 +123,6 @@ fn lote_continua_apos_falha_de_io() {
     );
 }
 
-
-
 #[test]
 fn marcador_literal_admite_nome_iniciado_por_hifen() {
     let arquivos = Arquivos::new();
@@ -135,4 +133,9 @@ fn marcador_literal_admite_nome_iniciado_por_hifen() {
         .output()
         .unwrap();
     assert!(resultado.status.success());
+}
+
+#[cfg(feature = "local-tests")]
+mod arquivos_locais {
+    include!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/local/cli.rs"));
 }

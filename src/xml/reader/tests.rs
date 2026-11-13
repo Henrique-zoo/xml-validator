@@ -142,10 +142,6 @@ fn physical_newline_ends_an_incomplete_xml_logical_line() {
     assert_eq!(document.location(document.source_map.lines[2].span).line, 2);
 }
 
-
-
-
-
 /// Exercita blocos opcionais, valores e mapas ausentes do exemplo principal.
 #[test]
 fn parses_optional_structures_from_the_xml_vocabulary() {
@@ -291,4 +287,12 @@ fn parses_optional_structures_from_the_xml_vocabulary() {
     assert_ne!(ncm_span, mercadoria_span);
     assert_eq!(ncm_span.text(source), Some("2203"));
     assert_eq!(mercadoria_span.text(source), Some("2203"));
+}
+
+#[cfg(feature = "local-tests")]
+mod arquivos_locais {
+    include!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/local/reader.rs"
+    ));
 }

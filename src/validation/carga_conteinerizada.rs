@@ -267,3 +267,12 @@ fn validar_campos_carga_vazia(
         },
     );
 }
+
+/// Testes privados opcionais, mantidos somente na instalação local.
+#[cfg(all(test, feature = "local-tests"))]
+mod testes_locais {
+    include!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/local/validation/carga_conteinerizada.rs"
+    ));
+}

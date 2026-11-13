@@ -159,22 +159,20 @@ cargo doc --no-deps
 cargo fmt --check
 ```
 
-Os testes de cada regra ficam em `#[cfg(test)] mod tests` no arquivo do módulo
-responsável. `tests/validation.rs` verifica a API pública e a conexão das regras
-no pipeline; `tests/cli.rs` exercita o executável. As fixtures e os construtores
-compartilhados ficam em `tests/common`, incluídos somente nas compilações de teste.
+Os testes versionados são autocontidos: usam dados sintéticos escritos no código
+e não exigem XMLs de produção. `tests/cli.rs` exercita o executável com arquivos
+temporários gerados pelo próprio teste.
 
-Para executar apenas uma parte:
-
-```console
-cargo test --lib validation::atracacao::tests
-cargo test --lib validation::carga::tests
-cargo test --test validation
-```
-
-O teste estrutural com o XML local de aproximadamente 75 MB permanece separado
-da suíte rápida. Execute-o explicitamente quando o arquivo estiver disponível:
+XMLs, XSDs, o manual SDP e os testes dependentes desses arquivos são locais e
+não são versionados. Quando presentes na máquina, os testes privados ficam em
+`tests/local`, `tests/common` e `tests/validation.rs`. A feature `local-tests`
+habilita sua compilação; ela só deve ser usada onde esses arquivos estiverem
+disponíveis.
 
 ```console
-cargo test --release parses_large_generated_dpworld_tup_document -- --ignored
+cargo test --features local-tests
+cargo test --release --features local-tests parses_large_generated_dpworld_tup_document -- --ignored
 ```
+
+Uma cópia limpa do repositório pode executar `cargo test`, `cargo fmt --check`
+e `cargo doc --no-deps` sem esses arquivos privados.

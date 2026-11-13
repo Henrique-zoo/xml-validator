@@ -116,3 +116,12 @@ pub(super) fn validar_residuos(
         }
     }
 }
+
+/// Testes privados opcionais, mantidos somente na instalação local.
+#[cfg(all(test, feature = "local-tests"))]
+mod testes_locais {
+    include!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/local/validation/residuos.rs"
+    ));
+}

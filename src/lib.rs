@@ -21,3 +21,12 @@ pub mod source;
 pub mod validation;
 /// Modelos XML, reader e espaço reservado para escrita.
 pub mod xml;
+
+#[cfg(all(test, feature = "local-tests"))]
+extern crate self as xml_transformer;
+
+/// Apoio dos testes privados, habilitado somente quando os arquivos locais existem.
+#[cfg(all(test, feature = "local-tests"))]
+mod test_support {
+    include!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/common/mod.rs"));
+}

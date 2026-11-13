@@ -796,3 +796,12 @@ pub fn parse_atracacoes<'xml>(
         sdp_source_map: source_maps,
     })
 }
+
+/// Testes privados opcionais, mantidos somente na instalação local.
+#[cfg(all(test, feature = "local-tests"))]
+mod testes_locais {
+    include!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/local/xml/reader/decode.rs"
+    ));
+}

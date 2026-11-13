@@ -1,2 +1,12 @@
 /target
 /tmp
+
+# Entradas e documentos locais, inclusive amostras e cópias de apoio.
+*.xml
+*.xsd
+/SDP_Manual*.pdf
+
+# Testes privados que dependem dessas entradas.
+/tests/common/
+/tests/validation.rs
+/tests/local/

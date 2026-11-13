@@ -124,3 +124,12 @@ pub(super) fn validar_tempos_descontos(
 fn nanossegundos(duracao: chrono::TimeDelta) -> i128 {
     i128::from(duracao.num_seconds()) * 1_000_000_000 + i128::from(duracao.subsec_nanos())
 }
+
+/// Testes privados opcionais, mantidos somente na instalação local.
+#[cfg(all(test, feature = "local-tests"))]
+mod testes_locais {
+    include!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/local/validation/tempos_descontos.rs"
+    ));
+}
