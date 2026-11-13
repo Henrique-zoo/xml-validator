@@ -968,3 +968,64 @@ fn validar_local_atracacao(
         );
     }
 }
+
+/// Testes autocontidos, independentes de arquivos locais.
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::xml::reader::parse_atracacoes;
+
+    /// Obtém um ID de elemento real sem depender de uma atracação completa.
+    fn elemento_de_teste() -> ElementId {
+        let mut interner = Interner::new();
+        parse_atracacoes(r#"<Movimento xmlns="SDPv2.xsd"/>"#, &mut interner)
+            .expect("a raiz vazia deve ser aceita pelo reader")
+            .sdp_source_map
+            .movimento
+    }
+
+    /// Resolve o trigrama e permite formatar novamente o mesmo adaptador.
+    #[test]
+    fn exibe_porto_com_texto_internado() {
+        let mut interner = Interner::new();
+        let porto = InstalacaoInformante::Porto {
+            trigrama: interner.entry("SUA").or_insert(),
+            elemento: elemento_de_teste(),
+        };
+        let exibicao = porto.exibir(&interner);
+
+        interner.entry("outro texto").or_insert();
+
+        assert_eq!(exibicao.to_string(), "Porto SUA");
+        assert_eq!(format!("informante: {exibicao}"), "informante: Porto SUA");
+    }
+
+    /// Resolve um código que não ocupa a primeira posição da tabela.
+    #[test]
+    fn exibe_tup_com_texto_internado() {
+        let mut interner = Interner::new();
+        interner.entry("SUA").or_insert();
+        let tup = InstalacaoInformante::Tup {
+            codigo: interner.entry("BRSP008").or_insert(),
+            elemento: elemento_de_teste(),
+        };
+
+        assert_eq!(tup.exibir(&interner).to_string(), "TUP BRSP008");
+    }
+
+    /// Preserva texto inválido e não prende o adaptador à vida da tabela ou da enum.
+    #[test]
+    fn exibicao_empresta_apenas_o_texto_original() {
+        let source = String::from("su?");
+        let exibicao = {
+            let mut interner = Interner::new();
+            let porto = InstalacaoInformante::Porto {
+                trigrama: interner.entry(&source).or_insert(),
+                elemento: elemento_de_teste(),
+            };
+            porto.exibir(&interner)
+        };
+
+        assert_eq!(exibicao.to_string(), "Porto su?");
+    }
+}

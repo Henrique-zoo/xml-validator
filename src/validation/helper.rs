@@ -294,3 +294,55 @@ impl ListagemOxford for [&str] {
         }
     }
 }
+
+/// Testes dos motivos específicos de rejeição dos formatos lexicais.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Distingue comprimento incorreto da posição de um caractere não numérico.
+    #[test]
+    fn codigo_numerico_distingue_comprimento_de_caractere_invalido() {
+        assert_eq!(
+            validar_codigo_numerico::<4>("123"),
+            Err(ErroFormatoTexto::ComprimentoExato {
+                esperado: 4,
+                encontrado: 3,
+            })
+        );
+        assert_eq!(
+            validar_codigo_numerico::<4>("12A4"),
+            Err(ErroFormatoTexto::CaractereInvalido {
+                posicao: 3,
+                encontrado: 'A',
+                esperado: "um algarismo ASCII de 0 a 9",
+            })
+        );
+    }
+
+    /// Confere que o código alfanumérico aceite ASCII e rejeite pontuação e acentos.
+    #[test]
+    fn codigo_alfanumerico_rejeita_pontuacao_e_unicode() {
+        assert!(validar_codigo_alfanumerico::<4>("22G1").is_ok());
+        assert!(matches!(
+            validar_codigo_alfanumerico::<4>("22-1"),
+            Err(ErroFormatoTexto::CaractereInvalido { posicao: 3, .. })
+        ));
+        assert!(matches!(
+            validar_codigo_alfanumerico::<4>("22Á1"),
+            Err(ErroFormatoTexto::CaractereInvalido { posicao: 3, .. })
+        ));
+    }
+
+    /// Confere o limite de comprimento e a quantidade observada no erro.
+    #[test]
+    fn texto_alfanumerico_informa_quando_excede_o_limite() {
+        assert_eq!(
+            validar_alfanumerico_com_comprimento_maximo::<4>("ABCDE"),
+            Err(ErroFormatoTexto::ComprimentoMaximo {
+                maximo: 4,
+                encontrado: 5,
+            })
+        );
+    }
+}

@@ -1594,3 +1594,58 @@ fn validar_sentido_tipo_de_operacao(
         ],
     );
 }
+
+/// Testes autocontidos, independentes de arquivos locais.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Cada declaração explícita basta, mesmo com código inválido e operação de apoio.
+    #[test]
+    fn indicadores_explicitos_selecionam_conteinerizacao() {
+        for (detalhamento, estado) in [(true, false), (false, true), (true, true)] {
+            assert_eq!(
+                classificar_carga("?", TipoOperacaoCarga::Apoio, detalhamento, estado, false),
+                ClassificacaoCarga::Conteinerizada,
+            );
+        }
+    }
+
+    /// A consulta fornecida pela orquestração identifica ISO sem depender de outros campos.
+    #[test]
+    fn codigo_catalogado_seleciona_conteinerizacao() {
+        assert_eq!(
+            classificar_carga("22G1", TipoOperacaoCarga::Apoio, false, false, true),
+            ClassificacaoCarga::Conteinerizada,
+        );
+    }
+
+    /// Sem indicadores, preserva a precedência de apoio, formato SH4 e ambiguidade.
+    #[test]
+    fn ausencia_de_indicadores_distingue_apoio_mercadoria_e_ambiguidade() {
+        for (codigo, operacao, esperado) in [
+            ("?", TipoOperacaoCarga::Apoio, ClassificacaoCarga::Apoio),
+            ("0101", TipoOperacaoCarga::Apoio, ClassificacaoCarga::Apoio),
+            (
+                "0101",
+                TipoOperacaoCarga::Safamento,
+                ClassificacaoCarga::NaoConteinerizada,
+            ),
+            (
+                "22G1",
+                TipoOperacaoCarga::Safamento,
+                ClassificacaoCarga::Ambigua,
+            ),
+            (
+                "?",
+                TipoOperacaoCarga::Safamento,
+                ClassificacaoCarga::Ambigua,
+            ),
+        ] {
+            assert_eq!(
+                classificar_carga(codigo, operacao, false, false, false),
+                esperado,
+            );
+        }
+    }
+}

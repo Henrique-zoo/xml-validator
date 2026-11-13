@@ -204,3 +204,28 @@ impl fmt::Display for DiagnosticoColorido<'_, '_> {
         self.erro.formatar(f, 0, true, false)
     }
 }
+
+/// Testes autocontidos, independentes de arquivos locais.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Confere recorte limitado e coluna Unicode em diagnóstico de XML sem formatação.
+    #[test]
+    fn erro_em_linha_longa_preserva_coluna_utf8_e_trecho_curto() {
+        use crate::source::SourceFile;
+        let source = format!("{}é漢INVÁLIDO", " ".repeat(2_000_000));
+        let arquivo = SourceFile::try_new(&source).unwrap();
+        let offset = source.find("INVÁLIDO").unwrap();
+        let erro = ValidationError::new(
+            &arquivo,
+            "código inválido",
+            None,
+            [(arquivo.span(offset..source.len()), "corrija este código")],
+        );
+        assert_eq!(erro.labels[0].location.column, 2_000_003);
+        let output = erro.to_string();
+        assert!(output.contains("é漢INVÁLIDO"));
+        assert!(output.len() < 500);
+    }
+}

@@ -189,3 +189,7 @@ impl<'xml> ParsedAtracacoes<'xml> {
         self.atracacoes
     }
 }
+
+/// Testes estruturais, de empréstimos e de localização do reader.
+#[cfg(test)]
+mod tests;

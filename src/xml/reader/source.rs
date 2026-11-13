@@ -684,3 +684,60 @@ pub(super) fn build_lines(source: &str, tokens: &[XmlToken]) -> Vec<XmlLine> {
     }
     lines
 }
+
+/// Testes dos tamanhos dos mapas e da apresentação das categorias lexicais.
+#[cfg(test)]
+mod tests {
+    use std::mem::size_of;
+
+    use super::*;
+
+    /// Confere a representação de quatro bytes de IDs obrigatórios e opcionais.
+    #[test]
+    fn optional_element_ids_remain_compact() {
+        assert_eq!(size_of::<ElementId>(), 4);
+        assert_eq!(size_of::<Option<ElementId>>(), 4);
+    }
+
+    /// Protege os tamanhos compactos dos mapas tipados contra regressões.
+    #[test]
+    fn typed_source_maps_store_ids_instead_of_spans() {
+        assert_eq!(size_of::<TemposDescontosSourceMap>(), 16);
+        assert_eq!(size_of::<CargaConteinerizadaSourceMap>(), 32);
+        assert_eq!(size_of::<CargaSourceMap>(), 100);
+        assert_eq!(size_of::<AtracacaoSourceMap>(), 116);
+    }
+
+    /// Confere a descrição de todas as categorias lexicais e linhas lógicas.
+    #[test]
+    fn displays_cobrem_as_categorias_de_tokens_e_linhas_logicas() {
+        assert_eq!(XmlTokenKind::Tag.to_string(), "tag de abertura");
+        assert_eq!(XmlTokenKind::EmptyTag.to_string(), "tag vazia");
+        assert_eq!(XmlTokenKind::Value.to_string(), "valor XML");
+        assert_eq!(XmlTokenKind::EndTag.to_string(), "tag de fechamento");
+        assert_eq!(XmlTokenKind::Declaration.to_string(), "declaração XML");
+        assert_eq!(XmlTokenKind::Other.to_string(), "outro token XML");
+
+        assert_eq!(
+            XmlLineKind::TagValueEndTag.to_string(),
+            "tag de abertura, valor e tag de fechamento"
+        );
+        assert_eq!(
+            XmlLineKind::TagEndTag.to_string(),
+            "tag de abertura e tag de fechamento"
+        );
+        assert_eq!(XmlLineKind::TagValue.to_string(), "tag de abertura e valor");
+        assert_eq!(XmlLineKind::Tag.to_string(), "tag");
+        assert_eq!(XmlLineKind::Value.to_string(), "valor XML");
+        assert_eq!(
+            XmlLineKind::ValueEndTag.to_string(),
+            "valor e tag de fechamento"
+        );
+        assert_eq!(XmlLineKind::EndTag.to_string(), "tag de fechamento");
+        assert_eq!(XmlLineKind::Declaration.to_string(), "declaração XML");
+        assert_eq!(
+            XmlLineKind::Other.to_string(),
+            "outra combinação de tokens XML"
+        );
+    }
+}

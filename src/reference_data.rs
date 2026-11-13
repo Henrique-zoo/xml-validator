@@ -321,3 +321,52 @@ fn validar_formato_codigo_conteiner(codigo: &str) -> Result<(), ErroCodigoContei
 
     Ok(())
 }
+
+/// Testes de carga do catálogo incorporado, consulta e causas de erro.
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+
+    use super::*;
+
+    /// Exercita a leitura do CSV incorporado e a consulta de códigos conhecidos.
+    #[test]
+    fn carrega_o_catalogo_incorporado() {
+        let catalogo = CatalogoCodigosConteiner::incorporado()
+            .expect("o catálogo distribuído com o programa deve ser válido");
+
+        assert_eq!(catalogo.len(), 107);
+        assert!(!catalogo.is_empty());
+        assert!(catalogo.contem("22G1"));
+        assert!(!catalogo.contem("ZZZZ"));
+    }
+
+    /// Confere a consulta ao catálogo pela fachada de dados de referência.
+    #[test]
+    fn agrega_o_catalogo_nos_dados_de_referencia() {
+        let dados = DadosReferencia::incorporados()
+            .expect("os dados distribuídos com o programa devem ser válidos");
+
+        assert!(dados.codigo_conteiner_existe("22G1"));
+        assert!(!dados.codigo_conteiner_existe("22Z9"));
+    }
+
+    /// Confere a mensagem do erro de catálogo e o encadeamento da causa lexical.
+    #[test]
+    fn descreve_codigo_invalido_e_preserva_sua_causa() {
+        let erro = CatalogoError::CodigoInvalido {
+            linha: 7,
+            codigo: String::from("22-g"),
+            motivo: ErroCodigoConteiner::CaractereInvalido {
+                posicao: 3,
+                encontrado: '-',
+            },
+        };
+
+        assert_eq!(
+            erro.to_string(),
+            "código de contêiner `22-g` inválido na linha 7: o caractere `-` na posição 3 deve ser um algarismo ASCII ou uma letra ASCII maiúscula"
+        );
+        assert!(erro.source().is_some());
+    }
+}

@@ -234,3 +234,49 @@ impl<'de> Deserialize<'de> for Peso {
         text.parse().map_err(D::Error::custom)
     }
 }
+
+/// Testes de conversão decimal exata, soma e overflow dos pesos.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Confere a conversão exata entre toneladas textuais e quilogramas.
+    #[test]
+    fn converts_tonnes_to_exact_kilograms() {
+        let peso: Peso = "226.620".parse().unwrap();
+
+        assert_eq!(peso.quilogramas(), 226_620);
+        assert_eq!(peso.to_string(), "226.620");
+    }
+
+    /// Exercita pesos inteiros e fracionários e rejeita precisão além de três casas.
+    #[test]
+    fn accepts_up_to_three_decimal_places() {
+        assert_eq!("1".parse::<Peso>().unwrap().quilogramas(), 1_000);
+        assert_eq!("1.2".parse::<Peso>().unwrap().quilogramas(), 1_200);
+        assert_eq!("1.25".parse::<Peso>().unwrap().quilogramas(), 1_250);
+        assert!("1.2501".parse::<Peso>().is_err());
+    }
+
+    /// Confere a soma sem arredondamento e a identidade do iterador vazio.
+    #[test]
+    fn soma_pesos_exatamente_e_usa_zero_no_iterador_vazio() {
+        let pesos = [
+            "1.250".parse::<Peso>().unwrap(),
+            "2.005".parse::<Peso>().unwrap(),
+            "0.745".parse::<Peso>().unwrap(),
+        ];
+
+        assert_eq!(pesos.into_iter().sum::<Peso>().to_string(), "4.000");
+        assert_eq!(std::iter::empty::<Peso>().sum::<Peso>(), Peso::ZERO);
+    }
+
+    /// Confere que a adição verificada sinalize overflow sem pânico.
+    #[test]
+    fn checked_add_informa_estouro() {
+        let maximo = Peso::from_quilogramas(u64::MAX);
+        let um_quilograma = Peso::from_quilogramas(1);
+
+        assert_eq!(maximo.checked_add(um_quilograma), None);
+    }
+}

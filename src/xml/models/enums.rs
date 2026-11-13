@@ -428,3 +428,116 @@ impl_try_from_u32!(TipoOperacaoCarga {
     19 => TipoOperacaoCarga::BaldeacaoDeCargaNacional,
     20 => TipoOperacaoCarga::BaldeacaoDeCargaEstrangeiraDePassagem,
 });
+
+/// Testes da apresentação textual das variantes e dos códigos SDP.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Confere nomes e códigos de todas as variantes das enumerações SDP.
+    #[test]
+    fn displays_descrevem_todas_as_variantes_e_seus_codigos() {
+        let casos: &[(String, &str)] = &[
+            (
+                NacionalidadeArmador::Brasileiro.to_string(),
+                "Brasileiro (1)",
+            ),
+            (
+                NacionalidadeArmador::Estrangeiro.to_string(),
+                "Estrangeiro (2)",
+            ),
+            (Sentido::NaoInformado.to_string(), "Não se aplica (0)"),
+            (Sentido::Desembarque.to_string(), "Desembarque (1)"),
+            (Sentido::Embarque.to_string(), "Embarque (2)"),
+            (NaturezaCarga::GranelSolido.to_string(), "Granel sólido (1)"),
+            (
+                NaturezaCarga::GranelLiquido.to_string(),
+                "Granel líquido (2)",
+            ),
+            (NaturezaCarga::CargaGeral.to_string(), "Carga geral (3)"),
+            (
+                NavegacaoCarga::NaoInformada.to_string(),
+                "Não se aplica (0)",
+            ),
+            (
+                NavegacaoCarga::NavegacaoInterior.to_string(),
+                "Navegação interior (1)",
+            ),
+            (
+                NavegacaoCarga::ApoioPortuario.to_string(),
+                "Apoio portuário (2)",
+            ),
+            (NavegacaoCarga::Cabotagem.to_string(), "Cabotagem (3)"),
+            (
+                NavegacaoCarga::ApoioMaritimo.to_string(),
+                "Apoio marítimo (4)",
+            ),
+            (NavegacaoCarga::LongoCurso.to_string(), "Longo curso (5)"),
+            (
+                TipoOperacao::MovimentacaoDeCarga.to_string(),
+                "Movimentação de carga (1)",
+            ),
+            (TipoOperacao::Passageiros.to_string(), "Passageiros (2)"),
+            (TipoOperacao::Apoio.to_string(), "Apoio (3)"),
+            (TipoOperacao::Marinha.to_string(), "Marinha (4)"),
+            (TipoOperacao::Abastecimento.to_string(), "Abastecimento (5)"),
+            (
+                TipoOperacao::ReparoManutencao.to_string(),
+                "Reparo/manutenção (6)",
+            ),
+            (TipoOperacao::Misto.to_string(), "Misto (7)"),
+            (
+                TipoOperacao::RetiradaDeResiduos.to_string(),
+                "Retirada de resíduos (8)",
+            ),
+            (TipoOperacaoCarga::Apoio.to_string(), "Apoio (3)"),
+            (
+                TipoOperacaoCarga::Abastecimento.to_string(),
+                "Abastecimento (5)",
+            ),
+            (TipoOperacaoCarga::Safamento.to_string(), "Safamento (8)"),
+            (
+                TipoOperacaoCarga::RemocaoABordo.to_string(),
+                "Remoção a bordo (10)",
+            ),
+            (
+                TipoOperacaoCarga::OperacaoIntermediaria.to_string(),
+                "Operação intermediária (11)",
+            ),
+            (
+                TipoOperacaoCarga::TransferenciaInterna.to_string(),
+                "Transferência interna (12)",
+            ),
+            (
+                TipoOperacaoCarga::LongoCursoExportacao.to_string(),
+                "Longo curso exportação (13)",
+            ),
+            (
+                TipoOperacaoCarga::LongoCursoImportacao.to_string(),
+                "Longo curso importação (14)",
+            ),
+            (
+                TipoOperacaoCarga::LongoCursoExportacaoComBaldeacaoDeCargaEstrangeira.to_string(),
+                "Longo curso exportação com baldeação de carga estrangeira (15)",
+            ),
+            (
+                TipoOperacaoCarga::LongoCursoImportacaoComBaldeacaoDeCargaEstrangeira.to_string(),
+                "Longo curso importação com baldeação de carga estrangeira (16)",
+            ),
+            (TipoOperacaoCarga::Cabotagem.to_string(), "Cabotagem (17)"),
+            (TipoOperacaoCarga::Interior.to_string(), "Interior (18)"),
+            (
+                TipoOperacaoCarga::BaldeacaoDeCargaNacional.to_string(),
+                "Baldeação de carga nacional (19)",
+            ),
+            (
+                TipoOperacaoCarga::BaldeacaoDeCargaEstrangeiraDePassagem.to_string(),
+                "Baldeação de carga estrangeira de passagem (20)",
+            ),
+        ];
+
+        for (obtido, esperado) in casos {
+            assert_eq!(obtido, esperado);
+        }
+    }
+}

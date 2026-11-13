@@ -62,3 +62,22 @@ impl LeiauteSdp {
         }
     }
 }
+
+/// Testes de apresentação dos leiautes reconhecidos.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Confere que a apresentação de cada leiaute inclua seu namespace.
+    #[test]
+    fn display_identifica_o_leiaute_e_seu_namespace() {
+        assert_eq!(
+            LeiauteSdp::Porto.to_string(),
+            "Porto organizado (SDPv2.xsd)"
+        );
+        assert_eq!(
+            LeiauteSdp::Tup.to_string(),
+            "Terminal de uso privado (SDPTup.xsd)"
+        );
+    }
+}

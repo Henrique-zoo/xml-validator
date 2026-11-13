@@ -344,3 +344,64 @@ impl<'src> SourceFile<'src> {
         self.line_index.point(self.text, position)
     }
 }
+
+/// Testes da representação compacta e da localização de spans em UTF-8.
+#[cfg(test)]
+mod tests {
+    use std::{mem::size_of, time::Instant};
+
+    use super::*;
+
+    /// Verifica que um span continue ocupando oito bytes.
+    #[test]
+    fn span_is_a_compact_byte_range() {
+        assert_eq!(size_of::<Span>(), 8);
+    }
+
+    /// Confere colunas Unicode e recortes físicos em uma fonte com CRLF.
+    #[test]
+    fn resolves_utf8_columns_and_physical_line_ranges() {
+        let source = "áβ<tag>\r\nvalor";
+        let index = LineIndex::new(source, source.len().try_into().unwrap());
+        let tag_position = source.find('<').unwrap();
+        let value_position = source.find("valor").unwrap();
+
+        let tag = index.span(tag_position..tag_position + 5);
+        let tag_location = index.locate(source, tag);
+        assert_eq!((tag_location.line, tag_location.column), (1, 3));
+        assert_eq!(tag.text(source), Some("<tag>"));
+        assert_eq!(tag_location.line_span.text(source), Some("áβ<tag>"));
+
+        let value = index.point(source, value_position);
+        let value_location = index.locate(source, value);
+        assert_eq!((value_location.line, value_location.column), (2, 1));
+        assert_eq!(value.text(source), Some("v"));
+        assert_eq!(value_location.line_span.text(source), Some("valor"));
+    }
+
+    /// Exercita 10.410 localizações reutilizando um único índice de linhas.
+    #[test]
+    fn resolves_more_than_ten_thousand_error_locations_from_one_index() {
+        /// Volume de diagnósticos usado para exercitar a reutilização do índice.
+        const ERROR_COUNT: usize = 10_410;
+        let source = "erro á\n".repeat(ERROR_COUNT);
+        let index = LineIndex::new(&source, source.len().try_into().unwrap());
+        let started = Instant::now();
+
+        for (line_index, start) in index.starts.iter().copied().enumerate() {
+            if line_index == ERROR_COUNT {
+                break;
+            }
+            let span = index.span(start as usize..start as usize + 4);
+            let location = index.locate(&source, span);
+            assert_eq!(location.line as usize, line_index + 1);
+            assert_eq!(location.column, 1);
+            assert_eq!(span.text(&source), Some("erro"));
+        }
+
+        eprintln!(
+            "{ERROR_COUNT} localizações resolvidas em {:?}",
+            started.elapsed()
+        );
+    }
+}
