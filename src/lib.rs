@@ -1,13 +1,23 @@
-//! Leitura dos XMLs SDP com modelos tipados, textos internados e spans de origem.
+//! Validador offline dos XMLs do SDP, com modelos tipados e diagnósticos localizados.
+//!
+//! O chamador conserva o texto XML e o [`interner::Interner`] usado no parsing.
+//! [`validation::Validador`] reutiliza o catálogo incorporado entre documentos;
+//! cada [`xml::reader::ParsedAtracacoes`] possui seus próprios mapas de origem.
+//! A biblioteca não faz I/O nem altera os documentos. A CLI lê arquivos em lote.
+
 #![warn(missing_docs, rustdoc::broken_intra_doc_links)]
 
-/// Apresentação de diagnósticos com recortes da fonte.
+/// Apresentação textual compartilhada entre erros de leitura e validação.
 pub mod diagnostic;
-/// Identificadores compactos para textos repetidos.
+/// Interner para reutilizar identificares para strings iguais.
 pub mod interner;
-/// Parsers auxiliares de formatos de entrada.
+/// Espaço reservado para parsers de outros formatos de entrada.
 pub mod parsers;
-/// Texto-fonte e posições para diagnósticos.
+/// Catálogos locais incorporados ao executável.
+pub mod reference_data;
+/// Texto-fonte, intervalos de bytes e localização para diagnósticos.
 pub mod source;
-/// Modelos e leitura dos XMLs SDP.
+/// Regras semânticas e árvore de diagnósticos do SDP.
+pub mod validation;
+/// Modelos XML, reader e espaço reservado para escrita.
 pub mod xml;
